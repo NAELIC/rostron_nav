@@ -8,15 +8,24 @@ from tf2_ros import TransformBroadcaster, TransformStamped
 from geometry_msgs.msg import Quaternion
 from math import sin, cos, pi
 
+
 class MinimalLocalisation(Node):
     def __init__(self):
-        super().__init__('minimal_filter')
+        super().__init__('localisation')
         qos_profile = QoSProfile(depth=10)
         self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
 
+        self.declare_parameter('robot_id', 0)
+        self.id_ = self.get_parameter(
+            'robot_id').get_parameter_value().integer_value
+
+        self.declare_parameter('team', 'yellow')
+        self.team_ = self.get_parameter(
+            'team').get_parameter_value().string_value
+
         self.subscription = self.create_subscription(
             Robot,
-            '/yellow/allies/r_0',
+            '/%s/allies/r_%d' % (self.team_, self.id_),
             self.vision_callback,
             10)
 
@@ -34,7 +43,6 @@ class MinimalLocalisation(Node):
         odom_trans.transform.rotation = self.euler_to_quaternion(
             0, 0, msg.pose.orientation.z)  # roll,pitch,yaw
         self.broadcaster.sendTransform(odom_trans)
-        self.get_logger().info("good !")
 
     def euler_to_quaternion(self, roll, pitch, yaw):
         qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - \
