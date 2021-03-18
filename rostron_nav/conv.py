@@ -25,11 +25,9 @@ class Convertisseur(Node):
             'team').get_parameter_value().string_value
 
         self.publisher_ = self.create_publisher(
-            Order, '/yellow/order', 10)
+            Order, '/%s/order' % self.team_, 10)
 
     def vision_callback(self, msg: Twist):
-        self.get_logger().info("%s" % self.team_)
-        self.get_logger().info("%d" % self.id_)
         order = Order()
         order.id = self.id_
         order.velocity = msg

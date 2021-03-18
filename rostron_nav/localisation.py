@@ -35,11 +35,11 @@ class MinimalLocalisation(Node):
         odom_trans.header.stamp = now.to_msg()
         odom_trans.header.frame_id = 'map'
         odom_trans.child_frame_id = 'odom'
-        # odom_trans.parent.frame_id = 'map'
         odom_trans.header.stamp = now.to_msg()
         odom_trans.transform.translation.x = msg.pose.position.x
         odom_trans.transform.translation.y = msg.pose.position.y
         odom_trans.transform.translation.z = 0.0
+        # TODO : Verify ?
         odom_trans.transform.rotation = self.euler_to_quaternion(
             0, 0, msg.pose.orientation.z)  # roll,pitch,yaw
         self.broadcaster.sendTransform(odom_trans)
