@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'localisation = rostron_nav.localisation:main',
-            'conv = rostron_nav.conv:main'
+            'nav2order = rostron_nav.nav2order:main'
 
         ],
     },
