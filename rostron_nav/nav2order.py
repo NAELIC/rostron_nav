@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import Bool
 
 from rostron_interfaces.msg import Robot
 
@@ -11,9 +12,23 @@ class Nav2Order(Node):
     kick_type_ = 0
     kick_power_ = 0.0
     spin_power_ = 0.0
+    halt = False
 
     def __init__(self):
         super().__init__('nav2order')
+
+        # parameters
+
+        self.declare_parameter('robot_id', 0)
+        self.declare_parameter('team', 'yellow')
+        
+        self.id_ = self.get_parameter(
+            'robot_id').get_parameter_value().integer_value
+
+        self.team_ = self.get_parameter(
+            'team').get_parameter_value().string_value
+
+
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -26,21 +41,32 @@ class Nav2Order(Node):
             self.hardware_callback,
             10)
 
-        self.declare_parameter('robot_id', 0)
-        self.id_ = self.get_parameter(
-            'robot_id').get_parameter_value().integer_value
+        self.create_subscription(
+            Bool,
+            '/%s/halt' % self.team_,
+            self.halt_callback,
+            10)
 
-        self.declare_parameter('team', 'yellow')
-        self.team_ = self.get_parameter(
-            'team').get_parameter_value().string_value
 
         self.publisher_ = self.create_publisher(
             Order, '/%s/order' % self.team_, 10)
 
     def vel_callback(self, msg: Twist):
+        if self.halt:
+            self.get_logger().info('halt')
+            self.publish_order(Twist())
+        else:
+            self.get_logger().info('publish order')
+            self.publish_order(msg)
+
+    def halt_callback(self, msg: Bool):
+        self.halt = msg.data
+        self.publish_order(Twist())
+
+    def publish_order(self, twist: Twist):
         order = Order()
         order.id = self.id_
-        order.velocity = msg
+        order.velocity = twist
         order.hardware.spin_power = self.spin_power_
         order.hardware.kick_type = self.kick_type_
         order.hardware.kick_power = self.kick_power_
