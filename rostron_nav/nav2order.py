@@ -73,7 +73,6 @@ class Nav2Order(Node):
         self.publisher_.publish(order)
 
     def hardware_callback(self, msg: Hardware):
-        self.get_logger().info(msg.NO_KICK)
         self.kick_type_ = msg.kick_type
         self.kick_power_ = msg.kick_power
         self.spin_power_ = msg.spin_power
