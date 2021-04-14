@@ -53,10 +53,8 @@ class Nav2Order(Node):
 
     def vel_callback(self, msg: Twist):
         if self.halt:
-            self.get_logger().info('halt')
             self.publish_order(Twist())
         else:
-            self.get_logger().info('publish order')
             self.publish_order(msg)
 
     def halt_callback(self, msg: Bool):
